@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/05 17:21:56 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/06 18:07:21 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,13 @@ int	main(int ac, char **av)
 	if (ac == 5)
 	{
 		while (i++ < philos)
-			pthread_create(&p, );
+			pthread_create(&p, NULL, func_philo);
 	}
 	else
 		write(2, "Incorrect input", 15);
+}
+
+void	func_philo(void *)
+{
+	
 }

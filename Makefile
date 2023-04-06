@@ -1,5 +1,5 @@
 SRC= philo.c tools.c
-FLAGS= -Wall -Werror -Wetra -g
+FLAGS= -Wall -Werror -Wetra -pthread -g
 NAME= philo
 RM= rm -f
 
