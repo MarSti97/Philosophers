@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:17:36 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/05 16:31:13 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/10 13:27:28 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,4 +35,23 @@ int	ft_atoi(const char *nptr)
 		i++;
 	}
 	return (res * neg);
+}
+
+void	*ft_calloc(size_t nmemb, size_t size)
+{
+	void	*ptr;
+	size_t	i;
+
+	i = 0;
+	ptr = malloc(nmemb * size);
+	if (!ptr)
+	{
+		return (0);
+	}
+	while (i < nmemb * size)
+	{
+		((unsigned char *)ptr)[i] = '\0';
+		i++;
+	}
+	return (ptr);
 }
