@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:17:36 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/10 13:27:28 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/11 10:30:41 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,14 @@ void	*ft_calloc(size_t nmemb, size_t size)
 		i++;
 	}
 	return (ptr);
+}
+
+void	error(char *msg)
+{
+	int	i;
+	
+	i = -1;
+	while (msg[++i])
+		write(2, &msg[i], 1);
+	exit(EXIT_FAILURE);
 }
