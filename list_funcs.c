@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 10:47:31 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/11 13:49:19 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/13 11:57:12 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,24 @@ void	ft_listadd_back(t_list **lst, t_list *new)
 		temp = temp->next;
 	temp->next = new;
 	new->prev = temp;
+}
+
+t_list	*listfirst(t_list *current)
+{
+	t_list	*temp;
+
+	temp = current;
+	while(temp->prev)
+		temp = temp->prev;
+	return (temp);
+}
+
+t_list	*listlast(t_list *current)
+{
+	t_list	*temp;
+
+	temp = current;
+	while(temp->next)
+		temp = temp->next;
+	return (temp);
 }

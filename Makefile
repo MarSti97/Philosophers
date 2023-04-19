@@ -1,4 +1,4 @@
-SRCS= philo.c tools.c list_funcs.c
+SRCS= philo.c tools.c list_funcs.c life.c
 FLAGS= -Wall -Werror -Wextra -pthread -g
 NAME= philo
 RM= rm -f
