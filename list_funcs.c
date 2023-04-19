@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 10:47:31 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/13 11:57:12 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/19 17:34:28 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,17 @@ void	make_list(t_philo *data, t_list **head)
 		if (!node)
 			return ;
 		node->name = i;
-		// printf("name: %i\n", node->name);
 		node->data = data;
 		node->next = NULL;
 		node->prev = NULL;
 		ft_listadd_back(head, node);
-		pthread_create(&node->data->thread_id, NULL, func_philo, (void *)node);
+	}
+	node = *head;
+	while(node)
+	{	
+		printf("name: %i\n", node->name);
+		pthread_create(&node->data->thread_id, NULL, func_philo, node);
+		node = node->next;
 	}
 }
 
