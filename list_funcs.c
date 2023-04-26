@@ -6,25 +6,28 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 10:47:31 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/19 17:34:28 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/26 18:23:59 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	make_list(t_philo *data, t_list **head)
+void	make_list(t_params params, t_list **head)
 {
 	int		i;
 	t_list	*node;
+	struct timeval	start;
 
 	i = 0;
-	while (++i <= data->total)
+	gettimeofday(&start, NULL);
+	while (++i <= params.total)
 	{
 		node = (t_list *)malloc(sizeof(t_list));
 		if (!node)
 			return ;
 		node->name = i;
-		node->data = data;
+		node->data = philo_init(params, i); // one by one like this
+		node->start = start;
 		node->next = NULL;
 		node->prev = NULL;
 		ft_listadd_back(head, node);
@@ -32,7 +35,7 @@ void	make_list(t_philo *data, t_list **head)
 	node = *head;
 	while(node)
 	{	
-		printf("name: %i\n", node->name);
+		// printf("name: %i, deadlock: %i\n", node->name, node->data->deadlock);
 		pthread_create(&node->data->thread_id, NULL, func_philo, node);
 		node = node->next;
 	}

@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/19 14:38:52 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/26 19:51:42 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,14 @@
 
 int	main(int ac, char **av)
 {
-	t_philo		philos;
 	t_list		*threads;
+	t_params	params;
 
 	threads = NULL;
 	if (ac == 5)
 	{
-		philo_init(&philos, av);
-		make_list(&philos, &threads);
+		params = get_params(av);
+		make_list(params, &threads);
 		while (threads->next)
 		{
 			pthread_join(threads->data->thread_id, NULL);
@@ -34,14 +34,33 @@ int	main(int ac, char **av)
 	return (0);
 }
 
-void	philo_init(t_philo *philos, char **av)
+t_params	get_params(char ** av)
 {
-	philos->total = ft_atoi(av[1]);
-	philos->die = ft_atoi(av[2]);
-	philos->eat = ft_atoi(av[3]);
-	philos->sleep = ft_atoi(av[4]);
+	t_params	params;
+	
+	params.total = ft_atoi(av[1]);
+	params.die = ft_atoi(av[2]);
+	params.eat = ft_atoi(av[3]);
+	params.sleep = ft_atoi(av[4]);
+	return (params);
+}
+
+t_philo	*philo_init(t_params params, int name)
+{
+	t_philo *philos;
+
+	philos = malloc(sizeof(t_philo));
+	if (!philos)
+		return (NULL); // add error message and quit
+	philos->name = name;
+	if (philos->name % 2 == 0)
+		philos->deadlock = 0;
+	else
+		philos->deadlock = 1;
+	philos->d = params;
 	philos->exit = 0;
-	gettimeofday(&philos->start, NULL);
+	pthread_mutex_init(&philos->fork, NULL);
+	return (philos);
 }
 
 int time_keep(t_list *phil, int q)
@@ -60,7 +79,7 @@ int time_keep(t_list *phil, int q)
 			return (1);
 		if (phil->data->exit == 1)
 			return (-1);
-		if (get_time(phil, 0) >= phil->data->die)
+		if (get_time(phil, 0) >= phil->data->d.die)
 			return (-1);
 	}
 	return (0);
@@ -68,13 +87,16 @@ int time_keep(t_list *phil, int q)
 
 int	get_time(t_list *p, int arg)
 {
+	struct timeval	pres;
+	
+	gettimeofday(&pres, NULL);
 	if (arg == 0)
 		return((p->data->l_meal.tv_sec * 1000)\
 		 + (p->data->l_meal.tv_usec / 1000));
 	else if (arg == 1)
 	{
-		return (((p->data->l_meal.tv_sec - p->data->start.tv_sec) * 1000)\
-		+ ((p->data->l_meal.tv_usec - p->data->start.tv_usec) / 1000));	
+		return (((pres.tv_sec - p->start.tv_sec) * 1000)\
+		+ ((pres.tv_usec - p->start.tv_usec) / 1000));	
 	}
 	return (-1);
 }

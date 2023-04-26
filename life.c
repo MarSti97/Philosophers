@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/19 17:25:13 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/26 19:36:20 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,11 @@ void	*func_philo(void *info)
 	t_list *philos;
 	
 	philos = (t_list *)info;
-	printf("HERE: %i\n", philos->name);
-	pthread_mutex_init(&philos->data->fork, NULL);
+	// printf("HERE: %i\n", philos->name);
 	gettimeofday(&philos->data->l_meal, NULL);
-	while (get_time(philos, 0) < philos->data->die) // maybe wont need this
+	while (get_time(philos, 0) < philos->data->d.die) // maybe wont need this
 	{
-		if (check_last_meal(philos) == 0)
+		if (check_forks(philos) == 0)
 			eating(philos);
 		else
 			thinking(philos);
@@ -36,28 +35,19 @@ void	*func_philo(void *info)
 	return(0);
 }
 
-int	check_last_meal(t_list *philos)
+int	check_forks(t_list *philos)
 {
     t_list  *first;
-    t_list  *last;
+    // t_list  *last;
 
     first = listfirst(philos);
-    last = listlast(philos);
-	if (philos->name == 1)
-	{
-        if (dying(last, philos, philos->next) == 0) 
-            return(grab_fork(philos, philos->next));
-	}
-	else if (philos->name == philos->data->total)
-	{
-		if (dying(philos->prev, philos, first) == 0)
-            return(grab_fork(philos, first));
-	}
+    // last = listlast(philos);
+	// if (philos->name == 1)
+	// 	return(grab_fork(philos, philos->next));
+	if (philos->name == philos->data->d.total)
+		return(grab_fork(philos, first));
 	else
-	{
-        if (dying(philos->prev, philos, philos->next) == 0)
-            return(grab_fork(philos, philos->next));	
-	}
+		return(grab_fork(philos, philos->next));	
 	return (-1);
 }
 
@@ -73,26 +63,36 @@ int	dying(t_list *left, t_list *phil, t_list *right) // doing this might count a
 
 int grab_fork(t_list *right, t_list *left)
 {
-    if (pthread_mutex_lock(&right->data->fork) != 0)
-		return (-2);
-	printf("%i ms: Philosopher %i has taken a fork\n", get_time(right, 1), right->name);
-	if (pthread_mutex_lock(&left->data->fork) != 0)
-		return (-3);
-	printf("%i ms: Philosopher %i has taken a fork\n", get_time(right, 1), right->name);
+	if (right->name % 2 == 0)
+	{
+		pthread_mutex_lock(&right->data->fork);
+		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, right->name);
+		pthread_mutex_lock(&left->data->fork);
+		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, left->name);		
+	}
+	else 
+	{
+		pthread_mutex_lock(&left->data->fork);
+		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, left->name);	
+		pthread_mutex_lock(&right->data->fork);
+		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, right->name);
+	}
 	return (0);
 }
 
 void	eating(t_list *phil)
 {
 	printf("%i ms: Philosopher %i is eating\n", get_time(phil, 1), phil->name);
-	if (time_keep(phil, phil->data->eat) == -1)
+	if (time_keep(phil, phil->data->d.eat) == -1)
 		return ;
 	pthread_mutex_unlock(&phil->data->fork);
-	if (phil->name == phil->data->total)
+	if (phil->name == phil->data->d.total)
 		pthread_mutex_unlock(&listfirst(phil)->data->fork);
+	else
+		pthread_mutex_unlock(&phil->next->data->fork);
 	gettimeofday(&phil->data->l_meal, NULL);
 	printf("%i ms: Philosopher %i is sleeping\n", get_time(phil, 1), phil->name);
-	if (time_keep(phil, phil->data->sleep) == -1)
+	if (time_keep(phil, phil->data->d.sleep) == -1)
 		return ;
 	printf("%i ms: Philosopher %i is thinking\n", get_time(phil, 1), phil->name);
 	// thinking(phil);
@@ -101,8 +101,8 @@ void	eating(t_list *phil)
 void	thinking(t_list *phil) // i fucked up! there is no set thinking time 
 {
 	printf("%i ms: Philosopher %i is thinking\n", get_time(phil, 1), phil->name);
-	if (time_keep(phil, phil->data->eat) == -1)
-		return ;
+	// if (time_keep(phil, phil->data->eat) == -1)
+		// return ;
 }
 
 void	dead(t_list *phil)
