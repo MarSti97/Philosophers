@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/26 19:36:20 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/27 12:12:23 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@ void	*func_philo(void *info)
 	philos = (t_list *)info;
 	// printf("HERE: %i\n", philos->name);
 	gettimeofday(&philos->data->l_meal, NULL);
-	while (get_time(philos, 0) < philos->data->d.die) // maybe wont need this
+	while (1) // maybe wont need this
 	{
+		// printf("TIME:%i, DIE:%i\n", get_time(philos, 0), philos->data->d.die);
 		if (check_forks(philos) == 0)
 			eating(philos);
 		else
@@ -31,7 +32,7 @@ void	*func_philo(void *info)
 			return (0); // use usleep function - suspends thread for x microsecs	
 		}
 	} // in thinking check if time to die has past coz then he's dead
-	dead(philos);
+	// dead(philos);
 	return(0);
 }
 
@@ -83,8 +84,8 @@ int grab_fork(t_list *right, t_list *left)
 void	eating(t_list *phil)
 {
 	printf("%i ms: Philosopher %i is eating\n", get_time(phil, 1), phil->name);
-	if (time_keep(phil, phil->data->d.eat) == -1)
-		return ;
+	phil->data->eating = 1;
+	time_keep(phil, phil->data->d.eat);
 	pthread_mutex_unlock(&phil->data->fork);
 	if (phil->name == phil->data->d.total)
 		pthread_mutex_unlock(&listfirst(phil)->data->fork);
@@ -92,8 +93,8 @@ void	eating(t_list *phil)
 		pthread_mutex_unlock(&phil->next->data->fork);
 	gettimeofday(&phil->data->l_meal, NULL);
 	printf("%i ms: Philosopher %i is sleeping\n", get_time(phil, 1), phil->name);
-	if (time_keep(phil, phil->data->d.sleep) == -1)
-		return ;
+	phil->data->eating = 0;
+	time_keep(phil, phil->data->d.sleep);
 	printf("%i ms: Philosopher %i is thinking\n", get_time(phil, 1), phil->name);
 	// thinking(phil);
 }
@@ -117,4 +118,23 @@ void	dead(t_list *phil)
 		start = start->next;
 	}
 	pthread_mutex_destroy(&phil->data->fork);
+	exit(1);
+}
+
+int	death_check(t_list *phil)
+{
+	t_list *first;
+	
+	first = listfirst(phil);
+	while(first)
+	{
+		// printf("HERE: name %i\n", first->name);
+		if (first->data->eating == 0 && get_time(first, 0) > first->data->d.die)
+		{
+			printf("HERE: dead %i\n", first->name);
+			dead(first);
+		}
+		first = first->next;
+	}
+	return (1);
 }

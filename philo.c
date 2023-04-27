@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/26 19:51:42 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/27 11:50:33 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ t_philo	*philo_init(t_params params, int name)
 		philos->deadlock = 1;
 	philos->d = params;
 	philos->exit = 0;
+	philos->eating = 0;
 	pthread_mutex_init(&philos->fork, NULL);
 	return (philos);
 }
@@ -70,7 +71,7 @@ int time_keep(t_list *phil, int q)
 	double			laps;
 	
 	gettimeofday(&start, NULL);
-	while (1)
+	while (death_check(phil))
 	{
 		gettimeofday(&pres, NULL);
 		laps = (((pres.tv_sec - start.tv_sec) * 1000)\
@@ -79,8 +80,8 @@ int time_keep(t_list *phil, int q)
 			return (1);
 		if (phil->data->exit == 1)
 			return (-1);
-		if (get_time(phil, 0) >= phil->data->d.die)
-			return (-1);
+		// if (arg == 1 && get_time(phil, 0) >= phil->data->d.die)
+		// 	return (-1);
 	}
 	return (0);
 }
@@ -91,8 +92,12 @@ int	get_time(t_list *p, int arg)
 	
 	gettimeofday(&pres, NULL);
 	if (arg == 0)
-		return((p->data->l_meal.tv_sec * 1000)\
-		 + (p->data->l_meal.tv_usec / 1000));
+	{
+		// return((p->data->l_meal.tv_sec * 1000)\
+		// + (p->data->l_meal.tv_usec / 1000));
+		return (((pres.tv_sec - p->data->l_meal.tv_sec) * 1000)\
+		+ ((pres.tv_usec - p->data->l_meal.tv_usec) / 1000));	// better this way
+	}
 	else if (arg == 1)
 	{
 		return (((pres.tv_sec - p->start.tv_sec) * 1000)\

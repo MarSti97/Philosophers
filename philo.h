@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:46:05 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/26 18:22:58 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/27 11:38:38 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ typedef struct	s_philosopher
 	int				name; 
 	int				exit;
 	int				deadlock;
+	int				eating;
 	t_params		d;
 	struct timeval	l_meal;
 	pthread_t		thread_id;
@@ -67,6 +68,7 @@ void	*func_philo(void *info);
 int		check_forks(t_list *philos);
 int		dying(t_list *left, t_list *phil, t_list *right);
 int		grab_fork(t_list *right, t_list *left);
+int		death_check(t_list *phil);
 // int		time(t_list *p);
 void	eating(t_list *phil);
 void	thinking(t_list *phil);

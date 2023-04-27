@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 10:47:31 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/26 18:23:59 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/04/27 11:23:43 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ void	free_list(t_list *lst, int error)
 		{
 			temp = lst;
 			lst = lst->next;
+			free (temp->data);
 			free (temp);
 		}
 	}
