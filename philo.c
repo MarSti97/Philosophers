@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/27 11:50:33 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/16 11:41:31 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,21 +16,24 @@ int	main(int ac, char **av)
 {
 	t_list		*threads;
 	t_params	params;
+	int			len;
 
+	len = -1;
 	threads = NULL;
 	if (ac == 5)
 	{
 		params = get_params(av);
 		make_list(params, &threads);
-		while (threads->next)
+		while (++len < params.total)
 		{
+			printf("HERE\n");
 			pthread_join(threads->data->thread_id, NULL);
 			threads = threads->next;
 		}
 	}
 	else
 		write(2, "Incorrect input", 15);
-	free_list(listfirst(threads), 0);
+	free_list(threads, 0);
 	return (0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/27 12:12:23 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/16 15:46:44 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,10 @@ void	*func_philo(void *info)
 	while (1) // maybe wont need this
 	{
 		// printf("TIME:%i, DIE:%i\n", get_time(philos, 0), philos->data->d.die);
-		if (check_forks(philos) == 0)
+		if (grab_fork(philos, philos->next) == 0)
 			eating(philos);
-		else
-			thinking(philos);
+		// else
+		// 	thinking(philos);
 		if (philos->data->exit == 1)
 		{
 			pthread_mutex_destroy(&philos->data->fork);
@@ -36,21 +36,21 @@ void	*func_philo(void *info)
 	return(0);
 }
 
-int	check_forks(t_list *philos)
-{
-    t_list  *first;
-    // t_list  *last;
+// int	check_forks(t_list *philos)
+// {
+//     t_list  *first;
+//     // t_list  *last;
 
-    first = listfirst(philos);
-    // last = listlast(philos);
-	// if (philos->name == 1)
-	// 	return(grab_fork(philos, philos->next));
-	if (philos->name == philos->data->d.total)
-		return(grab_fork(philos, first));
-	else
-		return(grab_fork(philos, philos->next));	
-	return (-1);
-}
+//     // first = listfirst(philos);
+//     // last = listlast(philos);
+// 	// if (philos->name == 1)
+// 	// 	return(grab_fork(philos, philos->next));
+// 	if (philos->name == philos->data->d.total)
+// 		return(grab_fork(philos, first));
+// 	else
+// 		return(grab_fork(philos, philos->next));	
+// 	return (-1);
+// }
 
 int	dying(t_list *left, t_list *phil, t_list *right) // doing this might count as communication... might need to take it out
 {
@@ -87,16 +87,16 @@ void	eating(t_list *phil)
 	phil->data->eating = 1;
 	time_keep(phil, phil->data->d.eat);
 	pthread_mutex_unlock(&phil->data->fork);
-	if (phil->name == phil->data->d.total)
-		pthread_mutex_unlock(&listfirst(phil)->data->fork);
-	else
-		pthread_mutex_unlock(&phil->next->data->fork);
+	// if (phil->name == phil->data->d.total)
+		// pthread_mutex_unlock(&phil->data->fork);
+	// else
+	pthread_mutex_unlock(&phil->next->data->fork);
 	gettimeofday(&phil->data->l_meal, NULL);
 	printf("%i ms: Philosopher %i is sleeping\n", get_time(phil, 1), phil->name);
 	phil->data->eating = 0;
 	time_keep(phil, phil->data->d.sleep);
 	printf("%i ms: Philosopher %i is thinking\n", get_time(phil, 1), phil->name);
-	// thinking(phil);
+	thinking(phil);
 }
 
 void	thinking(t_list *phil) // i fucked up! there is no set thinking time 
@@ -108,14 +108,16 @@ void	thinking(t_list *phil) // i fucked up! there is no set thinking time
 
 void	dead(t_list *phil)
 {
-	t_list *start;
-	
+	// t_list *start;
+	int		len;
+
+	len = phil->data->d.total;	
 	printf("%i ms: Philosopher %i DIED\n", get_time(phil, 1), phil->name);
-	start = listfirst(phil);
-	while(start->next)
+	// start = listfirst(phil);
+	while(len--)
 	{
-		start->data->exit = 1;
-		start = start->next;
+		phil->data->exit = 1;
+		phil = phil->next;
 	}
 	pthread_mutex_destroy(&phil->data->fork);
 	exit(1);
@@ -123,18 +125,20 @@ void	dead(t_list *phil)
 
 int	death_check(t_list *phil)
 {
-	t_list *first;
+	// t_list *first;
+	int		len;
 	
-	first = listfirst(phil);
-	while(first)
+	len = phil->data->d.total;	
+	// first = listfirst(phil);
+	while(len--)
 	{
-		// printf("HERE: name %i\n", first->name);
-		if (first->data->eating == 0 && get_time(first, 0) > first->data->d.die)
+		printf("HERE: name %i\n", phil->name);
+		if (phil->data->eating == 0 && get_time(phil, 0) > phil->data->d.die)
 		{
-			printf("HERE: dead %i\n", first->name);
-			dead(first);
+			printf("HERE: dead %i\n", phil->name);
+			dead(phil);
 		}
-		first = first->next;
+		phil = phil->next;
 	}
 	return (1);
 }
