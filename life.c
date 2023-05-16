@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/16 15:46:44 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/16 21:30:13 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ void	*func_philo(void *info)
 	
 	philos = (t_list *)info;
 	// printf("HERE: %i\n", philos->name);
-	gettimeofday(&philos->data->l_meal, NULL);
 	while (1) // maybe wont need this
 	{
 		// printf("TIME:%i, DIE:%i\n", get_time(philos, 0), philos->data->d.die);
@@ -108,16 +107,17 @@ void	thinking(t_list *phil) // i fucked up! there is no set thinking time
 
 void	dead(t_list *phil)
 {
-	// t_list *start;
+	t_list *temp;
 	int		len;
 
 	len = phil->data->d.total;	
 	printf("%i ms: Philosopher %i DIED\n", get_time(phil, 1), phil->name);
+	temp = phil;
 	// start = listfirst(phil);
 	while(len--)
 	{
-		phil->data->exit = 1;
-		phil = phil->next;
+		temp->data->exit = 1;
+		temp = temp->next;
 	}
 	pthread_mutex_destroy(&phil->data->fork);
 	exit(1);
@@ -125,20 +125,21 @@ void	dead(t_list *phil)
 
 int	death_check(t_list *phil)
 {
-	// t_list *first;
+	t_list *temp;
 	int		len;
 	
-	len = phil->data->d.total;	
+	len = phil->data->d.total;
+	temp = phil;
 	// first = listfirst(phil);
 	while(len--)
 	{
-		printf("HERE: name %i\n", phil->name);
-		if (phil->data->eating == 0 && get_time(phil, 0) > phil->data->d.die)
+		// printf("HERE: name %i\n", temp->name);
+		if (temp->data->eating == 0 && get_time(temp, 0) > temp->data->d.die)
 		{
-			printf("HERE: dead %i\n", phil->name);
-			dead(phil);
+			printf("HERE: dead %i\n", temp->name);
+			dead(temp);
 		}
-		phil = phil->next;
+		temp = temp->next;
 	}
 	return (1);
 }

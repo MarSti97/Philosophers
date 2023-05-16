@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 10:47:31 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/16 15:47:15 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/16 21:29:09 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void	make_list(t_params params, t_list **head)
 		node->start = start;
 		node->next = NULL;
 		node->prev = NULL;
+		gettimeofday(&node->data->l_meal, NULL);
 		ft_listadd_back(head, node);
 	}
 	(*head)->prev = listlast(*head);
@@ -39,7 +40,7 @@ void	make_list(t_params params, t_list **head)
 	{	
 		printf("NAME: %i\n", (node)->name);
 		pthread_create(&node->data->thread_id, NULL, func_philo, node);
-		usleep(10);
+		usleep(100);
 		// printf("name: %i, deadlock: %i\n", node->name, node->data->deadlock);
 		node = node->next;
 	}

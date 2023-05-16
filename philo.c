@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/16 11:41:31 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/16 21:24:50 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ int	get_time(t_list *p, int arg)
 	gettimeofday(&pres, NULL);
 	if (arg == 0)
 	{
-		// return((p->data->l_meal.tv_sec * 1000)\
+		// return((p->data->l_meal.tv_sec * 1000)
 		// + (p->data->l_meal.tv_usec / 1000));
 		return (((pres.tv_sec - p->data->l_meal.tv_sec) * 1000)\
 		+ ((pres.tv_usec - p->data->l_meal.tv_usec) / 1000));	// better this way
