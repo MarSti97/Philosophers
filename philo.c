@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/16 21:24:50 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/17 15:08:29 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,32 +20,55 @@ int	main(int ac, char **av)
 
 	len = -1;
 	threads = NULL;
-	if (ac == 5)
+	if (ac == 5 || ac == 6)
 	{
-		params = get_params(av);
+		params = get_params(av, ac);
 		make_list(params, &threads);
 		while (++len < params.total)
 		{
-			printf("HERE\n");
 			pthread_join(threads->data->thread_id, NULL);
 			threads = threads->next;
 		}
+		free_list(threads, 0);
 	}
 	else
-		write(2, "Incorrect input", 15);
-	free_list(threads, 0);
+		error("Incorrect input");
 	return (0);
 }
 
-t_params	get_params(char ** av)
+t_params	get_params(char ** av, int ac)
 {
 	t_params	params;
 	
-	params.total = ft_atoi(av[1]);
-	params.die = ft_atoi(av[2]);
-	params.eat = ft_atoi(av[3]);
-	params.sleep = ft_atoi(av[4]);
+	params.total = parse_arg(av[1], 0);
+	params.die = parse_arg(av[2], 0);
+	params.eat = parse_arg(av[3], 0);
+	params.sleep = parse_arg(av[4], 0);
+	if (ac == 6)
+		params.revs = parse_arg(av[5], 1);
+	else
+		params.revs = 0;
 	return (params);
+}
+
+int	parse_arg(char *arg, int flag)
+{
+	int	i;
+
+	i = 0;
+	while (arg[i])
+	{
+		if (arg[i] >= 48 && arg[i] <= 57)
+			i++;
+		else
+			error("Invalid argument");
+	}
+	i = ft_atoi(arg);
+	if (i < 0)
+		error("Invalid argument");
+	if (flag && i == 0)
+		error("Really? how is this supposed to work?");
+	return (i);
 }
 
 t_philo	*philo_init(t_params params, int name)
@@ -63,6 +86,7 @@ t_philo	*philo_init(t_params params, int name)
 	philos->d = params;
 	philos->exit = 0;
 	philos->eating = 0;
+	philos->counter = 0;
 	pthread_mutex_init(&philos->fork, NULL);
 	return (philos);
 }

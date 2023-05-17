@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 10:47:31 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/16 21:29:09 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/17 15:08:34 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ void	make_list(t_params params, t_list **head)
 	node = *head;
 	while(--i)
 	{	
-		printf("NAME: %i\n", (node)->name);
 		pthread_create(&node->data->thread_id, NULL, func_philo, node);
 		usleep(100);
 		// printf("name: %i, deadlock: %i\n", node->name, node->data->deadlock);

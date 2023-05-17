@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:46:05 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/04/27 11:38:38 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/17 15:51:14 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ typedef struct	s_params
 	int				eat;
 	int				sleep;
 	int				total;
+	int				revs;
 }				t_params;
 
 typedef struct	s_philosopher
@@ -33,6 +34,7 @@ typedef struct	s_philosopher
 	int				exit;
 	int				deadlock;
 	int				eating;
+	int				counter;
 	t_params		d;
 	struct timeval	l_meal;
 	pthread_t		thread_id;
@@ -49,10 +51,11 @@ typedef struct	s_list
 }				t_list;
 
 
-t_params	get_params(char ** av);
+t_params	get_params(char ** av, int ac);
 t_philo		*philo_init(t_params params, int name);
 int			time_keep(t_list *phil, int q);
 int			get_time(t_list *p, int arg);
+int			parse_arg(char *arg, int flag);
 //tool
 int		ft_atoi(const char *nptr);
 void	*ft_calloc(size_t nmemb, size_t size);
@@ -69,10 +72,10 @@ int		check_forks(t_list *philos);
 int		dying(t_list *left, t_list *phil, t_list *right);
 int		grab_fork(t_list *right, t_list *left);
 int		death_check(t_list *phil);
+void	counter_check(t_list *philos);
 // int		time(t_list *p);
 void	eating(t_list *phil);
-void	thinking(t_list *phil);
-void	dead(t_list *phil);
+void	end(t_list *phil, int arg);
 
 // fork1 p1 fork2 p2 fork3 p3 fork4 p4 fork5 p5
 
