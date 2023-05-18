@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 10:47:31 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/17 15:08:34 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/18 15:42:25 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,10 @@ void	make_list(t_params params, t_list **head)
 	int		i;
 	t_list	*node;
 	struct timeval	start;
+	pthread_mutex_t	print;
 
 	i = 0;
+	pthread_mutex_init(&print, NULL);
 	gettimeofday(&start, NULL);
 	while (++i <= params.total)
 	{
@@ -27,6 +29,7 @@ void	make_list(t_params params, t_list **head)
 			return ;
 		node->name = i;
 		node->data = philo_init(params, i); // one by one like this
+		node->data->print = print;
 		node->start = start;
 		node->next = NULL;
 		node->prev = NULL;
@@ -38,9 +41,9 @@ void	make_list(t_params params, t_list **head)
 	node = *head;
 	while(--i)
 	{	
+		printf("NAME: %i\n", node->name);
 		pthread_create(&node->data->thread_id, NULL, func_philo, node);
 		usleep(100);
-		// printf("name: %i, deadlock: %i\n", node->name, node->data->deadlock);
 		node = node->next;
 	}
 }

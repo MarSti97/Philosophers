@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:46:05 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/17 15:51:14 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/18 12:40:58 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ typedef struct	s_philosopher
 	struct timeval	l_meal;
 	pthread_t		thread_id;
 	pthread_mutex_t	fork;
+	pthread_mutex_t	print;
 }				t_philo;
 
 typedef struct	s_list
@@ -73,6 +74,7 @@ int		dying(t_list *left, t_list *phil, t_list *right);
 int		grab_fork(t_list *right, t_list *left);
 int		death_check(t_list *phil);
 void	counter_check(t_list *philos);
+void	printing(t_list *phil, int arg, char *act);
 // int		time(t_list *p);
 void	eating(t_list *phil);
 void	end(t_list *phil, int arg);

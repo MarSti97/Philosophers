@@ -1,5 +1,5 @@
 SRCS= philo.c tools.c list_funcs.c life.c
-FLAGS= -Wall -Werror -Wextra -pthread -g
+FLAGS= -Wall -Werror -Wextra -pthread -g -fsanitize=address
 NAME= philo
 RM= rm -f
 

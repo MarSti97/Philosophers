@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/17 16:05:55 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/18 15:41:41 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,33 +67,31 @@ int grab_fork(t_list *right, t_list *left)
 	{
 		pthread_mutex_lock(&right->data->fork);
 		pthread_mutex_lock(&left->data->fork);
-		usleep(100);
-		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, right->name);
-		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, left->name);		
+		// usleep(100);
+		printing(right, 1, NULL);
 	}
 	else 
 	{
 		pthread_mutex_lock(&left->data->fork);
 		pthread_mutex_lock(&right->data->fork);
-		usleep(100);
-		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, left->name);	
-		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, right->name);
+		// usleep(100);
+		printing(right, 1, NULL);
 	}
 	return (0);
 }
 
 void	eating(t_list *phil)
 {
-	printf("%i ms: Philosopher %i is eating\n", get_time(phil, 1), phil->name);
+	printing(phil, 2, "eating");
 	gettimeofday(&phil->data->l_meal, NULL);
 	phil->data->eating = 1;
 	time_keep(phil, phil->data->d.eat);
 	pthread_mutex_unlock(&phil->data->fork);
 	pthread_mutex_unlock(&phil->next->data->fork);
-	printf("%i ms: Philosopher %i is sleeping\n", get_time(phil, 1), phil->name);
 	phil->data->eating = 0;
+	printing(phil, 2, "sleeping");
 	time_keep(phil, phil->data->d.sleep);
-	printf("%i ms: Philosopher %i is thinking\n", get_time(phil, 1), phil->name);
+	printing(phil, 2, "thinking");
 }
 
 void	end(t_list *phil, int arg)
@@ -103,9 +101,9 @@ void	end(t_list *phil, int arg)
 
 	len = phil->data->d.total;
 	if (arg == 0)
-		printf("%i ms: Philosopher %i DIED\n", get_time(phil, 1), phil->name);
+		printing(phil, 3, NULL);
 	else if (arg == 1)
-		printf("%i ms: All Philosophers have eaten at least %i times\n", get_time(phil, 1), phil->data->d.revs);
+		printing(phil, 4, NULL);
 	temp = phil;
 	while(len--)
 	{
@@ -126,7 +124,7 @@ int	death_check(t_list *phil)
 	while(len--)
 	{
 		// printf("HERE: name %i\n", temp->name);
-		if (temp->data->eating == 0 && get_time(temp, 0) > temp->data->d.die)
+		if (get_time(temp, 0) > temp->data->d.die)
 		{
 			printf("HERE: dead %i\n", temp->name);
 			end(temp, 0);
@@ -134,4 +132,27 @@ int	death_check(t_list *phil)
 		temp = temp->next;
 	}
 	return (1);
+}
+
+void	printing(t_list *phil, int arg, char *act)
+{
+	int	time;
+	
+	pthread_mutex_lock(&phil->data->print);
+	time = get_time(phil, 1);
+	if (arg == 1)
+	{
+		printf("%i ms: Philosopher %i has taken a fork%i\n", \
+			time, phil->name, phil->name);
+		printf("%i ms: Philosopher %i has taken a fork%i\n", \
+			time, phil->name, phil->next->name);
+	}
+	else if (arg == 2)
+		printf("%i ms: Philosopher %i is %s\n", time, phil->name, act);
+	else if (arg == 3)
+		printf("%i ms: Philosopher %i DIED\n", time, phil->name);
+	else if (arg == 4)
+		printf("%i ms: All Philosophers have eaten at least %i times\n", \
+			time, phil->data->d.revs);
+	pthread_mutex_unlock(&phil->data->print);
 }
