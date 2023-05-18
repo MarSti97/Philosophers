@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/18 15:41:41 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/18 20:33:35 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,13 @@ void	*func_philo(void *info)
 	{
 		if (grab_fork(philos, philos->next) == 0)
 			eating(philos);
-		if (philos->data->d.revs != 0)
-			counter_check(philos);
 		if (philos->data->exit == 1)
 		{
 			pthread_mutex_destroy(&philos->data->fork);
 			return (0); // use usleep function - suspends thread for x microsecs	
 		}
+		if (philos->data->d.revs != 0)
+			counter_check(philos);
 	} // in thinking check if time to die has past coz then he's dead
 	// dead(philos);
 	return(0);
@@ -85,12 +85,14 @@ void	eating(t_list *phil)
 	printing(phil, 2, "eating");
 	gettimeofday(&phil->data->l_meal, NULL);
 	phil->data->eating = 1;
-	time_keep(phil, phil->data->d.eat);
+	if (time_keep(phil, phil->data->d.eat) == -1)
+		return ;
 	pthread_mutex_unlock(&phil->data->fork);
 	pthread_mutex_unlock(&phil->next->data->fork);
 	phil->data->eating = 0;
 	printing(phil, 2, "sleeping");
-	time_keep(phil, phil->data->d.sleep);
+	if (time_keep(phil, phil->data->d.sleep) == -1)
+		return ;
 	printing(phil, 2, "thinking");
 }
 
@@ -126,7 +128,7 @@ int	death_check(t_list *phil)
 		// printf("HERE: name %i\n", temp->name);
 		if (get_time(temp, 0) > temp->data->d.die)
 		{
-			printf("HERE: dead %i\n", temp->name);
+			printf("HERE: dead %i, time %i, d_time %i\n", temp->name, get_time(temp, 0), temp->data->d.die);
 			end(temp, 0);
 		}
 		temp = temp->next;
@@ -155,4 +157,18 @@ void	printing(t_list *phil, int arg, char *act)
 		printf("%i ms: All Philosophers have eaten at least %i times\n", \
 			time, phil->data->d.revs);
 	pthread_mutex_unlock(&phil->data->print);
+}
+
+void	*superviser(void *philosophers)
+{
+	t_list *philos;
+	
+	philos = (t_list *)philosophers;
+	while(philos)
+	{
+		if (get_time(philos, 0) > philos->data->d.die)
+			end(philos, 0);
+		philos = philos->next;
+	}
+	return (0);
 }

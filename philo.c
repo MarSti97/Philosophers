@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/18 13:02:03 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/18 21:05:48 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,14 +95,15 @@ int time_keep(t_list *phil, int q)
 {
 	struct timeval	start;
 	struct timeval	pres;
-	double			laps;
+	long			laps;
 	
 	gettimeofday(&start, NULL);
-	while (death_check(phil))
+	while (1)
 	{
 		gettimeofday(&pres, NULL);
 		laps = (((pres.tv_sec - start.tv_sec) * 1000)\
 		+ ((pres.tv_usec - start.tv_usec) / 1000));
+		// printf("TIME: %ld, %i\n", laps, q);
 		if (laps == q)
 			return (1);
 		if (phil->data->exit == 1)
