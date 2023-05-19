@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/18 21:05:48 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/19 16:49:33 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,14 +79,12 @@ t_philo	*philo_init(t_params params, int name)
 	if (!philos)
 		return (NULL); // add error message and quit
 	philos->name = name;
-	if (philos->name % 2 == 0)
-		philos->deadlock = 0;
-	else
-		philos->deadlock = 1;
 	philos->d = params;
 	philos->exit = 0;
 	philos->eating = 0;
 	philos->counter = 0;
+	pthread_mutex_init(&philos->exit_m, NULL);
+	pthread_mutex_init(&philos->counter_m, NULL);
 	pthread_mutex_init(&philos->fork, NULL);
 	return (philos);
 }
@@ -103,13 +101,16 @@ int time_keep(t_list *phil, int q)
 		gettimeofday(&pres, NULL);
 		laps = (((pres.tv_sec - start.tv_sec) * 1000)\
 		+ ((pres.tv_usec - start.tv_usec) / 1000));
-		// printf("TIME: %ld, %i\n", laps, q);
-		if (laps == q)
+		if (laps >= q)
 			return (1);
+		pthread_mutex_lock(&phil->data->exit_m);
 		if (phil->data->exit == 1)
+		{
+			pthread_mutex_unlock(&phil->data->exit_m);
 			return (-1);
-		// if (arg == 1 && get_time(phil, 0) >= phil->data->d.die)
-		// 	return (-1);
+		}
+		pthread_mutex_unlock(&phil->data->exit_m);
+		usleep(100);
 	}
 	return (0);
 }
@@ -121,8 +122,6 @@ int	get_time(t_list *p, int arg)
 	gettimeofday(&pres, NULL);
 	if (arg == 0)
 	{
-		// return((p->data->l_meal.tv_sec * 1000)
-		// + (p->data->l_meal.tv_usec / 1000));
 		return (((pres.tv_sec - p->data->l_meal.tv_sec) * 1000)\
 		+ ((pres.tv_usec - p->data->l_meal.tv_usec) / 1000));	// better this way
 	}

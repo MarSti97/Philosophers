@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/18 20:33:35 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/19 16:57:21 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,46 +19,10 @@ void	*func_philo(void *info)
 	philos = (t_list *)info;
 	while (1)
 	{
-		if (grab_fork(philos, philos->next) == 0)
-			eating(philos);
-		if (philos->data->exit == 1)
-		{
-			pthread_mutex_destroy(&philos->data->fork);
-			return (0); // use usleep function - suspends thread for x microsecs	
-		}
-		if (philos->data->d.revs != 0)
-			counter_check(philos);
+		grab_fork(philos, philos->next);
+		eating(philos);
 	} // in thinking check if time to die has past coz then he's dead
-	// dead(philos);
 	return(0);
-}
-
-void	counter_check(t_list *philos)
-{
-    t_list  *temp;
-	int		len;
-
-	philos->data->counter++;
-	len = philos->data->d.total;
-	while (len--)
-	{
-		// printf("LEN: %i\n", len);
-		if (temp->data->counter >= temp->data->d.revs)
-			temp = temp->next;
-		else
-			return ;
-	}
-	end(philos, 1);
-}
-
-int	dying(t_list *left, t_list *phil, t_list *right) // doing this might count as communication... might need to take it out
-{
-	int	time;
-
-	time = get_time(phil, 0);
-	if (time >= get_time(left, 0) && time >= get_time(right, 0))
-		return (0);
-	return (-1);
 }
 
 int grab_fork(t_list *right, t_list *left)
@@ -66,109 +30,90 @@ int grab_fork(t_list *right, t_list *left)
 	if (right->name % 2 == 0)
 	{
 		pthread_mutex_lock(&right->data->fork);
+		death_check(right, 2);
 		pthread_mutex_lock(&left->data->fork);
-		// usleep(100);
-		printing(right, 1, NULL);
+		death_check(right, 1);
+		usleep(10);
+		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, left->name);		
+		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, right->name);
 	}
 	else 
 	{
 		pthread_mutex_lock(&left->data->fork);
+		death_check(left, 2);
 		pthread_mutex_lock(&right->data->fork);
-		// usleep(100);
-		printing(right, 1, NULL);
+		death_check(right, 1);
+		usleep(10);
+		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, right->name);
+		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, left->name);	
 	}
 	return (0);
 }
 
 void	eating(t_list *phil)
 {
-	printing(phil, 2, "eating");
+	int	dead;
+
+	dead = 0;
+	printf("%i ms: Philosopher %i is eating\n", get_time(phil, 1), phil->name);
 	gettimeofday(&phil->data->l_meal, NULL);
-	phil->data->eating = 1;
-	if (time_keep(phil, phil->data->d.eat) == -1)
-		return ;
+	dead = time_keep(phil, phil->data->d.eat);
 	pthread_mutex_unlock(&phil->data->fork);
 	pthread_mutex_unlock(&phil->next->data->fork);
-	phil->data->eating = 0;
-	printing(phil, 2, "sleeping");
+	if (phil->data->d.revs != 0) // here or up?
+		if (counter_check(phil) == -1)
+			exit(0);
+	if (dead == -1)
+		exit(0);
+	printf("%i ms: Philosopher %i is sleeping\n", get_time(phil, 1), phil->name);
 	if (time_keep(phil, phil->data->d.sleep) == -1)
-		return ;
-	printing(phil, 2, "thinking");
+		exit(0);
+	printf("%i ms: Philosopher %i is thinking\n", get_time(phil, 1), phil->name);
 }
 
-void	end(t_list *phil, int arg)
+int	end(t_list *phil, int arg)
 {
 	t_list *temp;
 	int		len;
 
 	len = phil->data->d.total;
 	if (arg == 0)
-		printing(phil, 3, NULL);
+		printf("%i ms: Philosopher %i DIED\n", get_time(phil, 1), phil->name);
 	else if (arg == 1)
-		printing(phil, 4, NULL);
+		printf("%i ms: All Philosophers have eaten at least %i times\n", get_time(phil, 1), phil->data->d.revs);
 	temp = phil;
 	while(len--)
 	{
+		pthread_mutex_lock(&temp->data->exit_m);
 		temp->data->exit = 1;
+		pthread_mutex_unlock(&temp->data->exit_m);
+		usleep(100);
 		temp = temp->next;
 	}
-	pthread_mutex_destroy(&phil->data->fork);
-	exit(1);
+	return (-1);
 }
 
-int	death_check(t_list *phil)
+int	counter_check(t_list *philos)
 {
-	t_list *temp;
+    t_list  *temp;
 	int		len;
-	
-	len = phil->data->d.total;
-	temp = phil;
-	while(len--)
+
+	pthread_mutex_lock(&philos->data->counter_m);
+	philos->data->counter++;
+	pthread_mutex_unlock(&philos->data->counter_m);
+	len = philos->data->d.total;
+	temp = philos;
+	while (len--)
 	{
-		// printf("HERE: name %i\n", temp->name);
-		if (get_time(temp, 0) > temp->data->d.die)
+		pthread_mutex_lock(&temp->data->counter_m);
+		if (temp->data->counter >= temp->data->d.revs)
+			temp = temp->next;
+		else
 		{
-			printf("HERE: dead %i, time %i, d_time %i\n", temp->name, get_time(temp, 0), temp->data->d.die);
-			end(temp, 0);
+			pthread_mutex_unlock(&temp->data->counter_m);
+			return (0);
 		}
-		temp = temp->next;
+		pthread_mutex_unlock(&temp->prev->data->counter_m);
 	}
-	return (1);
-}
-
-void	printing(t_list *phil, int arg, char *act)
-{
-	int	time;
-	
-	pthread_mutex_lock(&phil->data->print);
-	time = get_time(phil, 1);
-	if (arg == 1)
-	{
-		printf("%i ms: Philosopher %i has taken a fork%i\n", \
-			time, phil->name, phil->name);
-		printf("%i ms: Philosopher %i has taken a fork%i\n", \
-			time, phil->name, phil->next->name);
-	}
-	else if (arg == 2)
-		printf("%i ms: Philosopher %i is %s\n", time, phil->name, act);
-	else if (arg == 3)
-		printf("%i ms: Philosopher %i DIED\n", time, phil->name);
-	else if (arg == 4)
-		printf("%i ms: All Philosophers have eaten at least %i times\n", \
-			time, phil->data->d.revs);
-	pthread_mutex_unlock(&phil->data->print);
-}
-
-void	*superviser(void *philosophers)
-{
-	t_list *philos;
-	
-	philos = (t_list *)philosophers;
-	while(philos)
-	{
-		if (get_time(philos, 0) > philos->data->d.die)
-			end(philos, 0);
-		philos = philos->next;
-	}
-	return (0);
+	return (end(philos, 1));
 }

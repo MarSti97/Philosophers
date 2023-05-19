@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 10:47:31 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/18 20:32:43 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/19 16:48:41 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,8 @@ void	make_list(t_params params, t_list **head)
 	int		i;
 	t_list	*node;
 	struct timeval	start;
-	pthread_mutex_t	print;
 
 	i = 0;
-	pthread_mutex_init(&print, NULL);
 	gettimeofday(&start, NULL);
 	while (++i <= params.total)
 	{
@@ -28,8 +26,7 @@ void	make_list(t_params params, t_list **head)
 		if (!node)
 			return ;
 		node->name = i;
-		node->data = philo_init(params, i);
-		node->data->print = print;
+		node->data = philo_init(params, i); // one by one like this
 		node->start = start;
 		node->next = NULL;
 		node->prev = NULL;
@@ -38,21 +35,34 @@ void	make_list(t_params params, t_list **head)
 	}
 	(*head)->prev = listlast(*head);
 	listlast(*head)->next = *head;
+	node = *head;
 	create_threads(*head, i);
+	// while(--i)
+	// {	
+	// 	pthread_create(&node->data->thread_id, NULL, func_philo, node);
+	// 	usleep(100);
+	// 	// printf("name: %i, deadlock: %i\n", node->name, node->data->deadlock);
+	// 	node = node->next;
+	// }
 }
 
 void	create_threads(t_list *philos, int i)
 {
+	// struct timeval	start;
 	pthread_t	super_id;
 	
+	// gettimeofday(&start, NULL);
 	while(--i)
 	{	
-		printf("NAME: %i\n", philos->name);
+		// philos->start = start;
+		gettimeofday(&philos->data->l_meal, NULL);
+		// printf("NAME: %i, time %i\n", philos->name, get_time(philos, 1));
 		pthread_create(&philos->data->thread_id, NULL, func_philo, philos);
-		usleep(100);
+		usleep(50);
 		philos = philos->next;
 	}
 	pthread_create(&super_id, NULL, superviser, philos);
+	pthread_join(super_id, NULL);
 }
 
 void	free_list(t_list *lst, int error)
@@ -69,6 +79,9 @@ void	free_list(t_list *lst, int error)
 		{
 			temp = lst;
 			lst = lst->next;
+			pthread_mutex_destroy(&temp->data->fork);
+			pthread_mutex_destroy(&temp->data->exit_m);
+			pthread_mutex_destroy(&temp->data->counter_m);
 			free (temp->data);
 			free (temp);
 		}
@@ -92,6 +105,16 @@ void	ft_listadd_back(t_list **lst, t_list *new)
 	temp->next = new;
 	new->prev = temp;
 }
+
+// t_list	*listfirst(t_list *current)
+// {
+// 	t_list	*temp;
+
+// 	temp = current;
+// 	while(temp->prev)
+// 		temp = temp->prev;
+// 	return (temp);
+// }
 
 t_list	*listlast(t_list *current)
 {
