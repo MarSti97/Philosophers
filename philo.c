@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/19 16:49:33 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/19 18:39:14 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,45 +15,62 @@
 int	main(int ac, char **av)
 {
 	t_list		*threads;
-	t_params	params;
-	int			len;
+	t_params	*params;
+	long		len;
 
 	len = -1;
 	threads = NULL;
 	if (ac == 5 || ac == 6)
 	{
-		params = get_params(av, ac);
-		make_list(params, &threads);
-		while (++len < params.total)
+		params = malloc(sizeof(t_params) * 1);
+		if (get_params(av, ac, params) == -1)
+		{
+			free (params);
+			return (1);
+		}
+		if (make_list(params, &threads) == -1)
+			return (1);
+		while (++len < params->total)
 		{
 			pthread_join(threads->data->thread_id, NULL);
 			threads = threads->next;
 		}
 		free_list(threads, 0);
+		free (params);
 	}
 	else
 		error("Incorrect input");
 	return (0);
 }
 
-t_params	get_params(char ** av, int ac)
+int	get_params(char ** av, int ac, t_params *params)
 {
-	t_params	params;
-	
-	params.total = parse_arg(av[1], 0);
-	params.die = parse_arg(av[2], 0);
-	params.eat = parse_arg(av[3], 0);
-	params.sleep = parse_arg(av[4], 0);
+	if (parse_arg(av[1], 0) == -1)
+		return (-1);
+	params->total = ft_atol(av[1]);
+	if (parse_arg(av[2], 0) == -1)
+		return (-1);
+	params->die = ft_atol(av[2]);
+	if (parse_arg(av[3], 0) == -1)
+		return (-1);
+	params->eat = ft_atol(av[3]);
+	if (parse_arg(av[4], 0) == -1)
+		return (-1);
+	params->sleep = ft_atol(av[4]);
 	if (ac == 6)
-		params.revs = parse_arg(av[5], 1);
+	{	
+		if (parse_arg(av[5], 1) == -1)
+			return (-1);
+		params->revs = ft_atol(av[5]);
+	}
 	else
-		params.revs = 0;
-	return (params);
+		params->revs = 0;
+	return (0);
 }
 
 int	parse_arg(char *arg, int flag)
 {
-	int	i;
+	long	i;
 
 	i = 0;
 	while (arg[i])
@@ -61,17 +78,17 @@ int	parse_arg(char *arg, int flag)
 		if (arg[i] >= 48 && arg[i] <= 57)
 			i++;
 		else
-			error("Invalid argument");
+			return (error("Invalid argument"));
 	}
-	i = ft_atoi(arg);
+	i = ft_atol(arg);
 	if (i < 0)
-		error("Invalid argument");
+		return (error("Invalid argument"));
 	if (flag && i == 0)
-		error("Really? how is this supposed to work?");
-	return (i);
+		return (error("Really? how is this supposed to work?"));
+	return (0);
 }
 
-t_philo	*philo_init(t_params params, int name)
+t_philo	*philo_init(t_params *params, int name)
 {
 	t_philo *philos;
 
@@ -81,54 +98,9 @@ t_philo	*philo_init(t_params params, int name)
 	philos->name = name;
 	philos->d = params;
 	philos->exit = 0;
-	philos->eating = 0;
 	philos->counter = 0;
 	pthread_mutex_init(&philos->exit_m, NULL);
 	pthread_mutex_init(&philos->counter_m, NULL);
 	pthread_mutex_init(&philos->fork, NULL);
 	return (philos);
-}
-
-int time_keep(t_list *phil, int q)
-{
-	struct timeval	start;
-	struct timeval	pres;
-	long			laps;
-	
-	gettimeofday(&start, NULL);
-	while (1)
-	{
-		gettimeofday(&pres, NULL);
-		laps = (((pres.tv_sec - start.tv_sec) * 1000)\
-		+ ((pres.tv_usec - start.tv_usec) / 1000));
-		if (laps >= q)
-			return (1);
-		pthread_mutex_lock(&phil->data->exit_m);
-		if (phil->data->exit == 1)
-		{
-			pthread_mutex_unlock(&phil->data->exit_m);
-			return (-1);
-		}
-		pthread_mutex_unlock(&phil->data->exit_m);
-		usleep(100);
-	}
-	return (0);
-}
-
-int	get_time(t_list *p, int arg)
-{
-	struct timeval	pres;
-	
-	gettimeofday(&pres, NULL);
-	if (arg == 0)
-	{
-		return (((pres.tv_sec - p->data->l_meal.tv_sec) * 1000)\
-		+ ((pres.tv_usec - p->data->l_meal.tv_usec) / 1000));	// better this way
-	}
-	else if (arg == 1)
-	{
-		return (((pres.tv_sec - p->start.tv_sec) * 1000)\
-		+ ((pres.tv_usec - p->start.tv_usec) / 1000));	
-	}
-	return (-1);
 }

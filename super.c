@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/19 13:47:03 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/19 15:51:04 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/19 18:52:20 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ void	*superviser(void *philosophers)
 	philos = (t_list *)philosophers;
 	while(philos)
 	{
-		if (get_time(philos, 0) > philos->data->d.die)
+		if (get_time(philos, 0) > philos->data->d->die)
 		{
 			if (end(philos, 0) == -1)
-				exit(0);
+				return (0);
 		}
 		philos = philos->next;
 		usleep(50);
@@ -30,7 +30,7 @@ void	*superviser(void *philosophers)
 	return (0);
 }
 
-void	death_check(t_list *phil, int arg)
+int	death_check(t_list *phil, int arg)
 {
 	pthread_mutex_lock(&phil->data->exit_m);
 	if (phil->data->exit == 1)
@@ -40,14 +40,15 @@ void	death_check(t_list *phil, int arg)
 			pthread_mutex_unlock(&phil->data->fork);
 			pthread_mutex_unlock(&phil->next->data->fork);
 			pthread_mutex_unlock(&phil->data->exit_m);
-			exit(0);
+			return (-1);
 		}
 		else if (arg == 2)
 		{
 			pthread_mutex_unlock(&phil->data->fork);
 			pthread_mutex_unlock(&phil->data->exit_m);
-			exit(0);
+			return (-1);
 		}
 	}
 	pthread_mutex_unlock(&phil->data->exit_m);
+	return (0);
 }
