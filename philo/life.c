@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/19 19:07:49 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/21 17:34:24 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,17 +28,18 @@ void	*func_philo(void *info)
 }
 
 int grab_fork(t_list *right, t_list *left)
-
 {
 	if (right->name % 2 == 0)
 	{
 		pthread_mutex_lock(&right->data->fork);
-		if (death_check(right, 2) == -1)
+		if (death_check(right, 2) == -1) // once wokring test to see if enough to check after second only
 			return (-1);
 		pthread_mutex_lock(&left->data->fork);
 		if (death_check(right, 1) == -1)
 			return (-1);
 		usleep(10);
+		//if (printing(right, 1, "eating") == -1)
+		//	return (-1);
 		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, left->name);		
 		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, right->name);
 	}
@@ -50,7 +51,9 @@ int grab_fork(t_list *right, t_list *left)
 		pthread_mutex_lock(&right->data->fork);
 		if (death_check(right, 1) == -1)
 			return (-1);
-		usleep(10);
+		usleep(10); // if i use printing might not need the delay because they will have to que
+		//if (printing(right, 1, "eating") == -1)
+		//	return (-1);
 		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, right->name);
 		printf("%i ms: Philosopher %i has taken a fork%i\n", get_time(right, 1), right->name, left->name);	
 	}
@@ -62,19 +65,23 @@ int	eating(t_list *phil)
 	int	dead;
 
 	dead = 0;
-	printf("%i ms: Philosopher %i is eating\n", get_time(phil, 1), phil->name);
+	printf("%i ms: Philosopher %i is eating\n", get_time(phil, 1), phil->name); // maybe put this with arg 1 printing to get forks
 	gettimeofday(&phil->data->l_meal, NULL);
 	dead = time_keep(phil, phil->data->d->eat);
 	pthread_mutex_unlock(&phil->data->fork);
 	pthread_mutex_unlock(&phil->next->data->fork);
+	if (dead == -1)
+		return (-1);
 	if (phil->data->d->revs != 0)
 		if (counter_check(phil) == -1)
 			return (-1);
-	if (dead == -1)
-		return (-1);
+	//if (printing(phil, 2, "sleeping") == -1)
+		//	return (-1);
 	printf("%i ms: Philosopher %i is sleeping\n", get_time(phil, 1), phil->name);
 	if (time_keep(phil, phil->data->d->sleep) == -1)
 		return (-1);
+	//if (printing(phil, 2, "thinking") == -1)
+		//	return (-1);
 	printf("%i ms: Philosopher %i is thinking\n", get_time(phil, 1), phil->name);
 	return (0);
 }
@@ -86,8 +93,12 @@ int	end(t_list *phil, int arg)
 
 	len = phil->data->d->total;
 	if (arg == 0)
+		//if (printing(phil, 3, NULL) == -1)
+		//	return (-1);
 		printf("%i ms: Philosopher %i DIED\n", get_time(phil, 1), phil->name);
 	else if (arg == 1)
+		//if (printing(phil, 4, NULL) == -1)
+		//	return (-1);
 		printf("%i ms: All Philosophers have eaten at least %li times\n", get_time(phil, 1), phil->data->d->revs);
 	temp = phil;
 	while (len--)

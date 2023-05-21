@@ -6,36 +6,11 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:17:36 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/19 19:05:30 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/21 17:03:49 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-// int	ft_atoi(const char *nptr)
-// {
-// 	int		i;
-// 	long	res;
-// 	int		neg;
-
-// 	i = 0;
-// 	res = 0;
-// 	neg = 1;
-// 	while ((nptr[i] >= 9 && nptr[i] <= 13) || nptr[i] == 32)
-// 		i++;
-// 	if (nptr[i] == '-' || nptr[i] == '+')
-// 	{
-// 		if (nptr[i] == '-')
-// 			neg = neg * -1;
-// 		i++;
-// 	}
-// 	while (nptr[i] <= 57 && nptr[i] >= 48)
-// 	{
-// 		res = res * 10 + nptr[i] - 48;
-// 		i++;
-// 	}
-// 	return (res * neg);
-// }
 
 long	ft_atol(const char *nptr)
 {

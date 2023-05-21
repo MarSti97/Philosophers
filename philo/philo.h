@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:46:05 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/19 19:05:59 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/21 17:09:21 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ typedef struct	s_philosopher
 	struct timeval	l_meal;
 	pthread_t		thread_id;
 	pthread_mutex_t	fork;
+	pthread_mutex_t	print;
 	pthread_mutex_t	exit_m;
 	pthread_mutex_t	counter_m;
 }				t_philo;

@@ -17,8 +17,10 @@ int	make_list(t_params *params, t_list **head)
 	long			i;
 	t_list			*node;
 	struct timeval	start;
+	// pthread_mutex_t	print;
 
 	i = 0;
+	// pthread_mutex_init(&print, NULL);
 	gettimeofday(&start, NULL);
 	while (++i <= params->total)
 	{
@@ -27,6 +29,7 @@ int	make_list(t_params *params, t_list **head)
 			return (-1);
 		node->name = i;
 		node->data = philo_init(params, i); // one by one like this
+		// node->data->print = print;
 		node->start = start;
 		node->next = NULL;
 		node->prev = NULL;

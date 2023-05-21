@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/19 18:39:14 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/21 17:41:28 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ int	main(int ac, char **av)
 			pthread_join(threads->data->thread_id, NULL);
 			threads = threads->next;
 		}
+		// pthread_mutex_destroy(&threads->data->print);
 		free_list(threads, 0);
 		free (params);
 	}
