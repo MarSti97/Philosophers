@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/21 17:41:28 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/22 16:46:15 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,7 @@ int	main(int ac, char **av)
 	{
 		params = malloc(sizeof(t_params) * 1);
 		if (get_params(av, ac, params) == -1)
-		{
-			free (params);
-			return (1);
-		}
+			return (freedom(NULL, params));
 		if (make_list(params, &threads) == -1)
 			return (1);
 		while (++len < params->total)
@@ -35,18 +32,16 @@ int	main(int ac, char **av)
 			pthread_join(threads->data->thread_id, NULL);
 			threads = threads->next;
 		}
-		// pthread_mutex_destroy(&threads->data->print);
-		free_list(threads, 0);
-		free (params);
+		freedom(threads, params);
 	}
 	else
 		error("Incorrect input");
 	return (0);
 }
 
-int	get_params(char ** av, int ac, t_params *params)
+int	get_params(char **av, int ac, t_params *params)
 {
-	if (parse_arg(av[1], 0) == -1)
+	if (parse_arg(av[1], 1) == -1)
 		return (-1);
 	params->total = ft_atol(av[1]);
 	if (parse_arg(av[2], 0) == -1)
@@ -91,17 +86,20 @@ int	parse_arg(char *arg, int flag)
 
 t_philo	*philo_init(t_params *params, int name)
 {
-	t_philo *philos;
+	t_philo	*philos;
 
-	philos = malloc(sizeof(t_philo));
+	philos = malloc(sizeof(t_philo) * 1);
 	if (!philos)
-		return (NULL); // add error message and quit
+		return (NULL);
 	philos->name = name;
 	philos->d = params;
 	philos->exit = 0;
 	philos->counter = 0;
+	philos->flag_end = 0;
 	pthread_mutex_init(&philos->exit_m, NULL);
 	pthread_mutex_init(&philos->counter_m, NULL);
 	pthread_mutex_init(&philos->fork, NULL);
+	pthread_mutex_init(&philos->end_m, NULL);
+	gettimeofday(&philos->l_meal, NULL);
 	return (philos);
 }

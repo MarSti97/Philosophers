@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:17:36 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/21 17:03:49 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/22 15:11:04 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,4 +64,37 @@ int	error(char *msg)
 	while (msg[++i])
 		write(2, &msg[i], 1);
 	return (-1);
+}
+
+int	freedom(t_list *list, void *dom)
+{
+	pthread_mutex_destroy(list->data->print);
+	if (list)
+		free_list(list, 0);
+	if (dom)
+		free(dom);
+	return (1);
+}
+
+void	free_list(t_list *lst, int error)
+{
+	t_list	*temp;
+	long	len;
+
+	len = lst->data->d->total;
+	if (lst)
+	{
+		if (error == 1)
+			write(2, "Error\n", 6);
+		while (len--)
+		{
+			temp = lst;
+			lst = lst->next;
+			pthread_mutex_destroy(&temp->data->fork);
+			pthread_mutex_destroy(&temp->data->exit_m);
+			pthread_mutex_destroy(&temp->data->counter_m);
+			free (temp->data);
+			free (temp);
+		}
+	}
 }

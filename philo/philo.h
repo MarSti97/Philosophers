@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:46:05 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/21 17:09:21 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/22 16:46:47 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 # include <sys/time.h>
 # include <stdlib.h>
 
-typedef struct	s_params
+typedef struct s_params
 {
 	long				die;
 	long				eat;
@@ -28,22 +28,25 @@ typedef struct	s_params
 	long				revs;
 }				t_params;
 
-typedef struct	s_philosopher
+typedef struct s_philosopher
 {
-	int				name; 
+	int				name;
 	int				exit;
 	int				deadlock;
 	long			counter;
+	int				flag_end;
 	t_params		*d;
 	struct timeval	l_meal;
 	pthread_t		thread_id;
+	pthread_t		*super_id;
+	pthread_mutex_t	end_m;
 	pthread_mutex_t	fork;
-	pthread_mutex_t	print;
+	pthread_mutex_t	*print;
 	pthread_mutex_t	exit_m;
 	pthread_mutex_t	counter_m;
 }				t_philo;
 
-typedef struct	s_list
+typedef struct s_list
 {
 	int				name;
 	t_philo			*data;
@@ -52,8 +55,7 @@ typedef struct	s_list
 	struct s_list	*prev;
 }				t_list;
 
-
-int			get_params(char ** av, int ac, t_params *params);
+int			get_params(char **av, int ac, t_params *params);
 t_philo		*philo_init(t_params *params, int name);
 int			time_keep(t_list *phil, long q);
 int			get_time(t_list *p, int arg);
@@ -62,6 +64,7 @@ int			parse_arg(char *arg, int flag);
 long		ft_atol(const char *nptr);
 void		*ft_calloc(size_t nmemb, size_t size);
 int			error(char *msg);
+int			freedom(t_list *list, void *dom);
 //list_funcs
 int			make_list(t_params *params, t_list **head);
 void		free_list(t_list *lst, int error);
@@ -71,10 +74,13 @@ void		create_threads(t_list *philos, int i);
 // life
 void		*func_philo(void *info);
 int			grab_fork(t_list *right, t_list *left);
-int			death_check(t_list *phil, int arg);
 int			counter_check(t_list *philos);
-void		*superviser(void *philosophers);
 int			eating(t_list *phil);
 int			end(t_list *phil, int arg);
+// super
+int			death_check(t_list *phil, int arg);
+void		*superviser(void *philosophers);
+int			printing(t_list *phil, int arg, char *act);
+void		end_print(t_list *phil, int arg);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/19 13:47:03 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/21 17:33:01 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/22 18:10:56 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,25 @@
 
 void	*superviser(void *philosophers)
 {
-	t_list *philos;
-	
+	t_list	*philos;
+
 	philos = (t_list *)philosophers;
-	while(philos)
+	while (philos)
 	{
+		usleep(1000);
 		if (get_time(philos, 0) > philos->data->d->die)
 		{
 			if (end(philos, 0) == -1)
 				return (0);
 		}
 		philos = philos->next;
-		usleep(50);
+		pthread_mutex_lock(&philos->data->end_m);
+		if (philos->data->flag_end == 1)
+		{
+			pthread_mutex_unlock(&philos->data->end_m);
+			return (0);
+		}
+		pthread_mutex_unlock(&philos->data->end_m);
 	}
 	return (0);
 }
@@ -39,15 +46,11 @@ int	death_check(t_list *phil, int arg)
 		{
 			pthread_mutex_unlock(&phil->data->fork);
 			pthread_mutex_unlock(&phil->next->data->fork);
-			pthread_mutex_unlock(&phil->data->exit_m);
-			return (-1);
 		}
-		else if (arg == 2)
-		{
-			pthread_mutex_unlock(&phil->data->fork);
-			pthread_mutex_unlock(&phil->data->exit_m);
-			return (-1);
-		}
+		// else if (arg == 0)
+		// 	pthread_mutex_unlock(&phil->data->fork);
+		pthread_mutex_unlock(&phil->data->exit_m);
+		return (-1);
 	}
 	pthread_mutex_unlock(&phil->data->exit_m);
 	return (0);
@@ -56,27 +59,43 @@ int	death_check(t_list *phil, int arg)
 int	printing(t_list *phil, int arg, char *act)
 {
 	int	time;
-	
-	pthread_mutex_lock(&phil->data->print);
-	if (death_check(phil, 1) == -1)
-			return (-1);
-	// maybe need a mutex lock here to check exit status
+
+	// pthread_mutex_lock(phil->data->print);
+	// if (death_check(phil, arg) == -1)
+	// {
+	// 	// pthread_mutex_unlock(phil->data->print); with this gone its working lots of phils but exit will be fucked 
+	// 	return (-1);
+	// }
 	time = get_time(phil, 1);
 	if (arg == 1)
 	{
-		printf("%i ms: Philosopher %i has taken a fork%i\n", \
-			time, phil->name, phil->name);
-		printf("%i ms: Philosopher %i has taken a fork%i\n", \
-			time, phil->name, phil->next->name);
+		printf("%i ms: Philosopher %i has taken a fork\n", \
+			time, phil->name);
+		printf("%i ms: Philosopher %i has taken a fork\n", \
+			time, phil->name);
 		printf("%i ms: Philosopher %i is %s\n", time, phil->name, act);
 	}
 	else if (arg == 2)
 		printf("%i ms: Philosopher %i is %s\n", time, phil->name, act);
-	else if (arg == 3)
-		printf("%i ms: Philosopher %i DIED\n", time, phil->name);
-	else if (arg == 4)
-		printf("%i ms: All Philosophers have eaten at least %i times\n", \
-			time, phil->data->d->revs);
-	pthread_mutex_unlock(&phil->data->print);
+	// pthread_mutex_unlock(phil->data->print);
 	return (0);
+}
+
+void	end_print(t_list *phil, int arg)
+{
+	int	time;
+
+	time = get_time(phil, 1);
+	pthread_mutex_lock(phil->data->print);
+	if (arg == 1)
+		printf("%i ms: Philosopher %i DIED\n", time, phil->name);
+	else if (arg == 2)
+	{
+		printf("%i ms: All Philosophers have eaten at least %li times\n", \
+			time, phil->data->d->revs);
+		pthread_mutex_lock(&phil->data->end_m);
+		phil->data->flag_end = 1;
+		pthread_mutex_unlock(&phil->data->end_m);
+	}
+	pthread_mutex_unlock(phil->data->print);
 }
