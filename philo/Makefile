@@ -1,5 +1,5 @@
 SRCS= philo.c tools.c list_funcs.c life.c super.c time.c
-FLAGS= -Wall -Werror -Wextra -pthread -g #-fsanitize=thread
+FLAGS= -Wall -Werror -Wextra -pthread -g -fsanitize=thread
 NAME= philo
 RM= rm -f
 

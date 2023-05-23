@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/19 17:03:44 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/22 16:30:27 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/23 18:16:19 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,21 @@
 
 int	time_keep(t_list *phil, long q)
 {
-	struct timeval	start;
-	struct timeval	pres;
-	long			laps;
+	// struct timeval	start;
+	// struct timeval	pres;
+	// long			laps;
 
-	gettimeofday(&start, NULL);
-	while (1)
-	{
-		gettimeofday(&pres, NULL);
-		laps = (((pres.tv_sec - start.tv_sec) * 1000) \
-		+ ((pres.tv_usec - start.tv_usec) / 1000));
-		if (laps >= q)
-			return (1);
-	}
-	// usleep(q * 1000);
+	// gettimeofday(&start, NULL);
+	// while (1)
+	// {
+	// 	usleep(10);
+	// 	gettimeofday(&pres, NULL);
+	// 	laps = (((pres.tv_sec - start.tv_sec) * 1000) \
+	// 	+ ((pres.tv_usec - start.tv_usec) / 1000));
+	// 	if (laps >= q)
+	// 		break ;
+	// }
+	usleep(q * 1000);
 	pthread_mutex_lock(&phil->data->exit_m);
 	if (phil->data->exit == 1)
 	{

@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/22 16:46:15 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/23 16:21:52 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	main(int ac, char **av)
 			pthread_join(threads->data->thread_id, NULL);
 			threads = threads->next;
 		}
-		freedom(threads, params);
+		freedom(&threads, params);
 	}
 	else
 		error("Incorrect input");
@@ -100,6 +100,5 @@ t_philo	*philo_init(t_params *params, int name)
 	pthread_mutex_init(&philos->counter_m, NULL);
 	pthread_mutex_init(&philos->fork, NULL);
 	pthread_mutex_init(&philos->end_m, NULL);
-	gettimeofday(&philos->l_meal, NULL);
 	return (philos);
 }

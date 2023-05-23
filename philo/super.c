@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/19 13:47:03 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/22 18:10:56 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/23 18:03:55 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,11 @@ void	*superviser(void *philosophers)
 	philos = (t_list *)philosophers;
 	while (philos)
 	{
-		usleep(1000);
 		if (get_time(philos, 0) > philos->data->d->die)
 		{
 			if (end(philos, 0) == -1)
 				return (0);
 		}
-		philos = philos->next;
 		pthread_mutex_lock(&philos->data->end_m);
 		if (philos->data->flag_end == 1)
 		{
@@ -33,6 +31,7 @@ void	*superviser(void *philosophers)
 			return (0);
 		}
 		pthread_mutex_unlock(&philos->data->end_m);
+		philos = philos->next;
 	}
 	return (0);
 }
@@ -60,12 +59,12 @@ int	printing(t_list *phil, int arg, char *act)
 {
 	int	time;
 
-	// pthread_mutex_lock(phil->data->print);
-	// if (death_check(phil, arg) == -1)
-	// {
-	// 	// pthread_mutex_unlock(phil->data->print); with this gone its working lots of phils but exit will be fucked 
-	// 	return (-1);
-	// }
+	pthread_mutex_lock(phil->data->print);
+	if (death_check(phil, arg) == -1)
+	{
+		pthread_mutex_unlock(phil->data->print);
+		return (-1);
+	}
 	time = get_time(phil, 1);
 	if (arg == 1)
 	{
@@ -77,7 +76,7 @@ int	printing(t_list *phil, int arg, char *act)
 	}
 	else if (arg == 2)
 		printf("%i ms: Philosopher %i is %s\n", time, phil->name, act);
-	// pthread_mutex_unlock(phil->data->print);
+	pthread_mutex_unlock(phil->data->print);
 	return (0);
 }
 
@@ -86,7 +85,6 @@ void	end_print(t_list *phil, int arg)
 	int	time;
 
 	time = get_time(phil, 1);
-	pthread_mutex_lock(phil->data->print);
 	if (arg == 1)
 		printf("%i ms: Philosopher %i DIED\n", time, phil->name);
 	else if (arg == 2)
@@ -97,5 +95,4 @@ void	end_print(t_list *phil, int arg)
 		phil->data->flag_end = 1;
 		pthread_mutex_unlock(&phil->data->end_m);
 	}
-	pthread_mutex_unlock(phil->data->print);
 }

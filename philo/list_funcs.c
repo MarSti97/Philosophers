@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 14:44:47 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/22 17:43:42 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/23 14:16:01 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,10 @@ int	make_list(t_params *params, t_list **head)
 {
 	long			i;
 	t_list			*node;
-	struct timeval	start;
 	pthread_mutex_t	print;
 
 	i = 0;
 	pthread_mutex_init(&print, NULL);
-	gettimeofday(&start, NULL);
 	while (++i <= params->total)
 	{
 		node = (t_list *)malloc(sizeof(t_list));
@@ -30,7 +28,6 @@ int	make_list(t_params *params, t_list **head)
 		node->name = i;
 		node->data = philo_init(params, i);
 		node->data->print = &print;
-		node->start = start;
 		node->next = NULL;
 		node->prev = NULL;
 		ft_listadd_back(head, node);
@@ -44,16 +41,18 @@ int	make_list(t_params *params, t_list **head)
 void	create_threads(t_list *philos, int i)
 {
 	pthread_t	super_id;
+	t_list		*temp;
 
+	temp = philos;
 	while (--i)
 	{	
-		gettimeofday(&philos->data->l_meal, NULL);
-		philos->data->super_id = &super_id;
-		pthread_create(&philos->data->thread_id, NULL, func_philo, philos);
+		temp->data->super_id = &super_id;
+		gettimeofday(&temp->start, NULL);
+		pthread_create(&temp->data->thread_id, NULL, func_philo, (void *)temp);
 		usleep(10);
-		philos = philos->next;
+		temp = temp->next;
 	}
-	pthread_create(&super_id, NULL, superviser, philos);
+	pthread_create(&super_id, NULL, superviser, temp);
 	pthread_join(super_id, NULL);
 }
 
