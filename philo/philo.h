@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:46:05 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/23 16:22:39 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/24 10:42:53 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,13 @@ typedef struct s_list
 int			get_params(char **av, int ac, t_params *params);
 t_philo		*philo_init(t_params *params, int name);
 int			time_keep(t_list *phil, long q);
-int			get_time(t_list *p, int arg);
+long		get_time(t_list *p, int arg);
 int			parse_arg(char *arg, int flag);
 //tool
 long		ft_atol(const char *nptr);
 void		*ft_calloc(size_t nmemb, size_t size);
 int			error(char *msg);
-int			freedom(t_list **list, void *dom);
+int			freedom(t_list **list, void *dom, int arg);
 //list_funcs
 int			make_list(t_params *params, t_list **head);
 void		free_list(t_list *lst, int error);
@@ -81,7 +81,5 @@ int			death_check(t_list *phil, int arg);
 void		*superviser(void *philosophers);
 int			printing(t_list *phil, int arg, char *act);
 void		end_print(t_list *phil, int arg);
-// test
-void		*test_func(void *info);
 
 #endif

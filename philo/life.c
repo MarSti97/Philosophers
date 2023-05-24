@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/19 11:57:08 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/23 18:20:33 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/24 10:30:17 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,18 +38,16 @@ int	grab_fork(t_list *right, t_list *left)
 	if (right->name % 2 == 0)
 	{
 		pthread_mutex_lock(&right->data->fork);
-		// if (death_check(right, 0) == -1)
-		// 	return (-1);
 		pthread_mutex_lock(&left->data->fork);
+		gettimeofday(&right->data->l_meal, NULL);
 		if (printing(right, 1, "eating") == -1)
 			return (-1);
 	}
 	else
 	{
 		pthread_mutex_lock(&left->data->fork);
-		// if (death_check(left, 0) == -1)
-		// 	return (-1);
 		pthread_mutex_lock(&right->data->fork);
+		gettimeofday(&right->data->l_meal, NULL);
 		if (printing(right, 1, "eating") == -1)
 			return (-1);
 	}
@@ -58,24 +56,24 @@ int	grab_fork(t_list *right, t_list *left)
 
 int	eating(t_list *phil)
 {
-	// int	dead;
+	int	dead;
 
-	// dead = 0;
-	gettimeofday(&phil->data->l_meal, NULL);
-	usleep(phil->data->d->eat * 1000);
-	// dead = time_keep(phil, phil->data->d->eat);
+	dead = 0;
+	dead = time_keep(phil, phil->data->d->eat);
 	pthread_mutex_unlock(&phil->data->fork);
 	pthread_mutex_unlock(&phil->next->data->fork);
 	if (death_check(phil, 0) == -1)
 		return (-1);
 	if (phil->data->d->revs != 0)
-		if (counter_check(phil) == -1)
-			return (-1);
+	{
+		pthread_mutex_lock(&phil->data->counter_m);
+		phil->data->counter++;
+		pthread_mutex_unlock(&phil->data->counter_m);
+	}
 	if (printing(phil, 2, "sleeping") == -1)
 		return (-1);
-	// if (time_keep(phil, phil->data->d->sleep) == -1)
-	// 	return (-1);
-	usleep(phil->data->d->sleep * 1000);
+	if (time_keep(phil, phil->data->d->sleep) == -1)
+		return (-1);
 	if (printing(phil, 2, "thinking") == -1)
 		return (-1);
 	return (0);
@@ -92,7 +90,7 @@ int	end(t_list *phil, int arg)
 	if (death_check(phil, 0) == -1)
 	{
 		pthread_mutex_unlock(phil->data->print);
-		return (-1);
+		return (0);
 	}
 	if (arg == 0)
 		end_print(phil, 1);
@@ -106,7 +104,7 @@ int	end(t_list *phil, int arg)
 		temp = temp->next;
 	}
 	pthread_mutex_unlock(phil->data->print);
-	return (-1);
+	return (0);
 }
 
 int	counter_check(t_list *philos)
@@ -114,9 +112,6 @@ int	counter_check(t_list *philos)
 	t_list	*temp;
 	long	len;
 
-	pthread_mutex_lock(&philos->data->counter_m);
-	philos->data->counter++;
-	pthread_mutex_unlock(&philos->data->counter_m);
 	len = philos->data->d->total;
 	temp = philos;
 	while (len--)
@@ -127,7 +122,7 @@ int	counter_check(t_list *philos)
 		else
 		{
 			pthread_mutex_unlock(&temp->data->counter_m);
-			return (0);
+			return (1);
 		}
 		pthread_mutex_unlock(&temp->prev->data->counter_m);
 	}

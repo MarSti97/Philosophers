@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 14:45:48 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/23 16:21:52 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/24 10:43:31 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	main(int ac, char **av)
 	{
 		params = malloc(sizeof(t_params) * 1);
 		if (get_params(av, ac, params) == -1)
-			return (freedom(NULL, params));
+			return (freedom(NULL, params, 0));
 		if (make_list(params, &threads) == -1)
 			return (1);
 		while (++len < params->total)
@@ -32,10 +32,10 @@ int	main(int ac, char **av)
 			pthread_join(threads->data->thread_id, NULL);
 			threads = threads->next;
 		}
-		freedom(&threads, params);
+		freedom(&threads, params, 1);
 	}
 	else
-		error("Incorrect input");
+		error("Incorrect input\n");
 	return (0);
 }
 
@@ -74,13 +74,13 @@ int	parse_arg(char *arg, int flag)
 		if (arg[i] >= 48 && arg[i] <= 57)
 			i++;
 		else
-			return (error("Invalid argument"));
+			return (error("Invalid argument\n"));
 	}
 	i = ft_atol(arg);
 	if (i < 0)
-		return (error("Invalid argument"));
+		return (error("Invalid argument\n"));
 	if (flag && i == 0)
-		return (error("Really? how is this supposed to work?"));
+		return (error("Really? how is this supposed to work?\n"));
 	return (0);
 }
 

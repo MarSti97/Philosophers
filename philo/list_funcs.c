@@ -6,7 +6,7 @@
 /*   By: mstiedl <mstiedl@student.42lisboa.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/22 14:44:47 by mstiedl           #+#    #+#             */
-/*   Updated: 2023/05/23 14:16:01 by mstiedl          ###   ########.fr       */
+/*   Updated: 2023/05/24 10:06:34 by mstiedl          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,14 +40,16 @@ int	make_list(t_params *params, t_list **head)
 
 void	create_threads(t_list *philos, int i)
 {
-	pthread_t	super_id;
-	t_list		*temp;
+	pthread_t		super_id;
+	struct timeval	start;
+	t_list			*temp;
 
 	temp = philos;
+	gettimeofday(&start, NULL);
 	while (--i)
 	{	
 		temp->data->super_id = &super_id;
-		gettimeofday(&temp->start, NULL);
+		temp->start = start;
 		pthread_create(&temp->data->thread_id, NULL, func_philo, (void *)temp);
 		usleep(10);
 		temp = temp->next;
